@@ -73,17 +73,32 @@ export const POST = async (request) => {
 
 
 
+        // const addData = async (nope) => {
+        //     try {
+        //         await prisma.kontak.create({
+        //             data:{
+        //                 nope:nope
+        //             }
+        //         })
+        //     } catch (error) {
+        //         console.log(`gagal add data kontak dari file ${filePath}`, error)
+        //     }
+        // }
         const addData = async (nope) => {
             try {
                 await prisma.kontak.create({
-                    data:{
-                        nope:nope
+                    data: {
+                        nope: nope
                     }
-                })
+                });
             } catch (error) {
-                console.log(`gagal add data kontak dari file ${filePath}`, error)
+                if (error.code === 'P2002') {
+                    console.log(`Kontak dengan nomor ${nope} sudah ada di database.`);
+                } else {
+                    console.log(`Gagal menambahkan kontak ${nope}:`, error);
+                }
             }
-        }
+        };
 
         let kontakExist;
         try {
@@ -95,28 +110,39 @@ export const POST = async (request) => {
         }
 
         // Melakukan loop pada data yang diambil dari file (jsonData)
+        // await Promise.all(
+        //     jsonData
+        //         .filter(item => item[0] && (typeof item[0] === 'number' || typeof item[0] === 'string'))
+        //         .map( async (item) => {
+        //             let noKontak;
+        //             // Cek apakah item tidak undefined
+        //             if (item !== undefined) {
+        //                 noKontak = item[0];
+        //                 // Format nomor kontak menggunakan fungsi formatPhoneNumber
+        //                 const cleanKontak = formatPhoneNumber(noKontak);
+        
+        //                 // Cek apakah nomor kontak sudah ada di database
+        //                 const kontakSudahAda = kontakExist.some(kontak => cleanKontak === kontak.nope);
+        
+        //                 if (!kontakSudahAda && cleanKontak !== '') {
+        //                     await addData(cleanKontak)
+        //                 }
+        //             }
+        //         })
+        //     );
+
         await Promise.all(
             jsonData
                 .filter(item => item[0] && (typeof item[0] === 'number' || typeof item[0] === 'string'))
-                .map( async (item) => {
-                    let noKontak;
-        
-                    // Cek apakah item tidak undefined
+                .map(async (item) => {
                     if (item !== undefined) {
-                        noKontak = item[0];
-        
-                        // Format nomor kontak menggunakan fungsi formatPhoneNumber
-                        const cleanKontak = formatPhoneNumber(noKontak);
-        
-                        // Cek apakah nomor kontak sudah ada di database
-                        const kontakSudahAda = kontakExist.some(kontak => cleanKontak === kontak.nope);
-        
-                        if (!kontakSudahAda && cleanKontak !== '') {
-                            await addData(cleanKontak)
+                        const cleanKontak = formatPhoneNumber(item[0]);
+                        if (cleanKontak !== '') {
+                            await addData(cleanKontak);
                         }
                     }
                 })
-            );
+        );
         
 
 
