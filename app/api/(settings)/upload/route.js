@@ -89,6 +89,11 @@ export const POST = async (request) => {
         try {
             // Mendapatkan data kontak yang sudah ada dari database
             kontakExist = await prisma.kontak.findMany();
+            kontakExist = kontakExist.map(kontak => ({
+                ...kontak,
+                nope: formatPhoneNumber(kontak.nope)
+            }));
+            
         } catch (error) {
             console.log("Gagal mengambil semua data kontak", error)
             return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
