@@ -27,5 +27,5 @@ model Kontak {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  nope String
+  nope String @unique
 }
